@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>CampusConnect | Analytics Dashboard</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/app.css">
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script src="js/analytics.js" defer></script>
+
+</head>
+
+<body>
+
+    <!-- Header -->
+
+    <header class="header">
+
+        <h1>📊 CampusConnect</h1>
+
+        <nav>
+
+            <a href="dashboard.html">Dashboard</a>
+            <a href="attendance.html">Attendance</a>
+            <a href="notes.html">Notes</a>
+            <a href="placement.html">Placement</a>
+            <a href="results.html">Results</a>
+            <a href="chatbot.html">AI Chatbot</a>
+            <a href="events.html">Events</a>
+            <a href="bus.html">Bus Tracking</a>
+            <a href="analytics.html" class="active">Analytics</a>
+            <a href="profile.html">Profile</a>
+            <a href="login.html">Logout</a>
+
+        </nav>
+
+    </header>
+
+    <!-- Main -->
+
+    <main class="container">
+
+        <h2>📈 Analytics Dashboard</h2>
+
+        <p>Monitor attendance, placements, events, notes, and student performance.</p>
+
+        <!-- Statistics -->
+
+        <section class="stats">
+
+            <div class="stat-box">
+                <h3>Total Students</h3>
+                <h2 id="totalStudents">0</h2>
+            </div>
+
+            <div class="stat-box">
+                <h3>Faculty</h3>
+                <h2 id="totalFaculty">0</h2>
+            </div>
+
+            <div class="stat-box">
+                <h3>Attendance</h3>
+                <h2 id="avgAttendance">94%</h2>
+            </div>
+
+            <div class="stat-box">
+                <h3>Placements</h3>
+                <h2 id="placementRate">85%</h2>
+            </div>
+
+        </section>
+
+        <br>
+
+        <!-- Charts -->
+
+        <section class="dashboard-grid">
+
+            <div class="dashboard-card">
+                <h3>Attendance Analysis</h3>
+                <canvas id="attendanceChart"></canvas>
+            </div>
+
+            <div class="dashboard-card">
+                <h3>Placement Statistics</h3>
+                <canvas id="placementChart"></canvas>
+            </div>
+
+            <div class="dashboard-card">
+                <h3>Department Performance</h3>
+                <canvas id="departmentChart"></canvas>
+            </div>
+
+            <div class="dashboard-card">
+                <h3>Events Participation</h3>
+                <canvas id="eventsChart"></canvas>
+            </div>
+
+        </section>
+
+        <br>
+
+        <!-- Summary -->
+
+        <section class="card">
+
+            <h3>Performance Summary</h3>
+
+            <table class="notes-table">
+
+                <thead>
+
+                    <tr>
+                        <th>Category</th>
+                        <th>Status</th>
+                        <th>Value</th>
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    <tr>
+                        <td>Attendance</td>
+                        <td>Excellent</td>
+                        <td>94%</td>
+                    </tr>
+
+                    <tr>
+                        <td>Placements</td>
+                        <td>Good</td>
+                        <td>85%</td>
+                    </tr>
+
+                    <tr>
+                        <td>Events</td>
+                        <td>Excellent</td>
+                        <td>92%</td>
+                    </tr>
+
+                    <tr>
+                        <td>Notes Uploaded</td>
+                        <td>Available</td>
+                        <td>620 Files</td>
+                    </tr>
+
+                    <tr>
+                        <td>Faculty Performance</td>
+                        <td>Excellent</td>
+                        <td>96%</td>
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+
+    <footer>
+
+        <p>
+            © 2026 CampusConnect | AI Smart Campus Platform
+        </p>
+
+    </footer>
+
+</body>
+
+</html>

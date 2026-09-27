@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CampusConnect | Attendance</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/app.css">
+    <link rel="stylesheet" href="css/style.css">
+
+    <script src="js/attendance.js" defer></script>
+</head>
+
+<body>
+
+    <!-- Header -->
+    <header class="header">
+
+        <h1>CampusConnect</h1>
+
+        <nav>
+            <a href="dashboard.html">Dashboard</a>
+            <a href="attendance.html" class="active">Attendance</a>
+            <a href="notes.html">Notes</a>
+            <a href="placement.html">Placement</a>
+            <a href="results.html">Results</a>
+            <a href="chatbot.html">AI Chatbot</a>
+            <a href="profile.html">Profile</a>
+        </nav>
+
+    </header>
+
+    <!-- Main Container -->
+    <main class="container">
+
+        <!-- Attendance Card -->
+        <section class="attendance-card">
+
+            <h2>Student Attendance</h2>
+
+            <p>
+                <strong>Name :</strong>
+                <span id="studentName">Student</span>
+            </p>
+
+            <p>
+                <strong>Date :</strong>
+                <span id="currentDate"></span>
+            </p>
+
+            <div class="button-group">
+
+                <button id="presentBtn" class="present-btn">
+                    ✅ Mark Present
+                </button>
+
+                <button id="absentBtn" class="absent-btn">
+                    ❌ Mark Absent
+                </button>
+
+                <button id="resetAttendance" class="reset-btn">
+                    🔄 Reset Attendance
+                </button>
+
+            </div>
+
+        </section>
+
+        <!-- Statistics -->
+        <section class="stats">
+
+            <div class="stat-box">
+                <h3>Present</h3>
+                <h2 id="presentCount">0</h2>
+            </div>
+
+            <div class="stat-box">
+                <h3>Absent</h3>
+                <h2 id="absentCount">0</h2>
+            </div>
+
+            <div class="stat-box">
+                <h3>Attendance</h3>
+                <h2 id="attendancePercentage">0%</h2>
+            </div>
+
+        </section>
+
+        <!-- Attendance History -->
+        <section class="table-section">
+
+            <h2>Attendance History</h2>
+
+            <table class="attendance-table">
+
+                <thead>
+
+                    <tr>
+                        <th>S.No</th>
+                        <th>Date</th>
+                        <th>Status</th>
+                    </tr>
+
+                </thead>
+
+                <tbody id="attendanceTable">
+
+                </tbody>
+
+            </table>
+
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer>
+
+        <p>
+            © 2026 CampusConnect | AI Smart Campus Platform
+        </p>
+
+    </footer>
+
+</body>
+
+</html>

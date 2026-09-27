@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>CampusConnect | Register</title>
+
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="css/register.css">
+
+</head>
+
+<body>
+
+<!-- Animated Background -->
+
+<div class="background">
+
+<span></span>
+<span></span>
+<span></span>
+<span></span>
+<span></span>
+<span></span>
+
+</div>
+
+<!-- Navbar -->
+
+<nav>
+
+<div class="logo">
+
+<i class="fa-solid fa-graduation-cap"></i>
+
+CampusConnect
+
+</div>
+
+<a href="login.html" class="login-btn">
+
+Login
+
+</a>
+
+</nav>
+
+<!-- Register Section -->
+
+<section class="register-section">
+
+<div class="register-container">
+
+<!-- Left Side -->
+
+<div class="register-image">
+
+<img src="images/campus-hero.png" alt="Register">
+
+<h2>Create Your Account</h2>
+
+<p>
+
+Join CampusConnect and experience the next generation of smart campus management.
+
+</p>
+
+</div>
+
+<!-- Right Side -->
+
+<div class="register-form">
+
+<h2>Create <span>Account</span></h2>
+
+<p class="subtitle">Fill in your details to get started</p>
+
+<form id="registerForm">
+
+<div class="input-row">
+
+<div class="input-group">
+
+<i class="fa-solid fa-user"></i>
+
+<input
+type="text"
+id="fullName"
+placeholder="Enter Full Name"
+required>
+
+</div>
+
+<div class="input-group">
+
+<i class="fa-solid fa-id-card"></i>
+
+<input
+type="text"
+id="rollNumber"
+placeholder="Enter Roll Number"
+required>
+
+</div>
+
+</div>
+
+<div class="input-row">
+
+<div class="input-group">
+
+<i class="fa-solid fa-envelope"></i>
+
+<input
+type="email"
+id="email"
+placeholder="College Email"
+required>
+
+</div>
+
+<div class="input-group">
+
+<i class="fa-solid fa-phone"></i>
+
+<input
+type="tel"
+id="phone"
+placeholder="Phone Number"
+required>
+
+</div>
+
+</div>
+
+<div class="input-row" id="academicRow">
+
+<div class="input-group">
+
+<i class="fa-solid fa-building-columns"></i>
+
+<select id="branch">
+<option value="">Select Branch</option>
+<option value="CSE">CSE</option>
+<option value="ECE">ECE</option>
+<option value="EEE">EEE</option>
+<option value="MECH">MECH</option>
+<option value="CIVIL">CIVIL</option>
+</select>
+
+</div>
+
+<div class="input-group">
+
+<i class="fa-solid fa-layer-group"></i>
+
+<select id="year">
+<option value="">Select Year</option>
+<option value="1st Year">1st Year</option>
+<option value="2nd Year">2nd Year</option>
+<option value="3rd Year">3rd Year</option>
+<option value="4th Year">4th Year</option>
+</select>
+
+</div>
+
+</div>
+
+<div class="input-row">
+
+<div class="input-group password-box">
+
+<i class="fa-solid fa-lock"></i>
+
+<input
+type="password"
+id="password"
+placeholder="Password"
+required>
+
+<i
+class="fa-solid fa-eye eye"
+id="togglePassword">
+
+</i>
+
+</div>
+
+<div class="input-group password-box">
+
+<i class="fa-solid fa-lock"></i>
+
+<input
+type="password"
+id="confirmPassword"
+placeholder="Confirm Password"
+required>
+
+<i
+class="fa-solid fa-eye eye"
+id="toggleConfirmPassword">
+
+</i>
+
+</div>
+
+</div>
+
+<label style="display:block;margin-bottom:10px;color:var(--text);font-size:14px;">
+Select Role
+</label>
+
+<div class="role-box" id="roleBox">
+
+<div class="role" data-role="Student">
+<i class="fa-solid fa-user-graduate"></i>
+Student
+</div>
+
+<div class="role" data-role="Faculty">
+<i class="fa-solid fa-chalkboard-user"></i>
+Faculty
+</div>
+
+<div class="role" data-role="Admin">
+<i class="fa-solid fa-user-shield"></i>
+Admin
+</div>
+
+</div>
+
+<input type="hidden" id="role">
+
+<div class="check-box">
+
+<input type="checkbox" id="terms" required>
+
+<label for="terms">I agree to the Terms &amp; Conditions</label>
+
+</div>
+
+<button type="submit" class="register-btn">
+
+Create Account
+
+</button>
+
+<div class="divider">
+
+<span>OR</span>
+
+</div>
+
+<div class="social-register">
+
+<a href="javascript:void(0)" class="social-btn" title="Continue with Google">
+
+<i class="fab fa-google"></i>
+
+</a>
+
+<a href="javascript:void(0)" class="social-btn" title="Continue with GitHub">
+
+<i class="fab fa-github"></i>
+
+</a>
+
+</div>
+
+<p class="account-link">
+
+Already have an account?
+
+<a href="login.html">
+
+Login
+
+</a>
+
+</p>
+
+</form>
+
+</div>
+
+</div>
+
+</section>
+
+<script src="js/register.js"></script>
+
+</body>
+
+</html>

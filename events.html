@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>CampusConnect | Events</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/app.css">
+
+    <script src="js/events.js" defer></script>
+
+</head>
+
+<body>
+
+    <!-- Header -->
+
+    <header class="header">
+
+        <h1>CampusConnect</h1>
+
+        <nav>
+            <a href="dashboard.html">Dashboard</a>
+            <a href="attendance.html">Attendance</a>
+            <a href="notes.html">Notes</a>
+            <a href="placement.html">Placement</a>
+            <a href="results.html">Results</a>
+            <a href="chatbot.html">AI Chatbot</a>
+            <a href="events.html" class="active">Events</a>
+            <a href="profile.html">Profile</a>
+            <a href="login.html">Logout</a>
+        </nav>
+
+    </header>
+
+    <!-- Main -->
+
+    <main class="container">
+
+        <h2>🎉 Campus Events</h2>
+
+        <p>
+            Register for workshops, hackathons, seminars,
+            cultural festivals, sports events, and more.
+        </p>
+
+        <br>
+
+        <!-- Search -->
+
+        <section class="card">
+
+            <input
+                type="text"
+                id="searchEvent"
+                placeholder="🔍 Search Events..."
+            >
+
+        </section>
+
+        <br>
+
+        <!-- Event Cards -->
+
+        <section class="dashboard-grid" id="eventContainer">
+
+            <div class="dashboard-card">
+
+                <h3>💻 Hackathon 2026</h3>
+
+                <p><strong>Date:</strong> 15 August 2026</p>
+
+                <p><strong>Venue:</strong> Seminar Hall</p>
+
+                <p>24-Hour Coding Competition.</p>
+
+                <button class="register-btn">
+                    Register
+                </button>
+
+            </div>
+
+            <div class="dashboard-card">
+
+                <h3>🤖 AI Workshop</h3>
+
+                <p><strong>Date:</strong> 22 August 2026</p>
+
+                <p><strong>Venue:</strong> Computer Lab</p>
+
+                <p>Learn Artificial Intelligence & ML.</p>
+
+                <button class="register-btn">
+                    Register
+                </button>
+
+            </div>
+
+            <div class="dashboard-card">
+
+                <h3>🎭 Cultural Fest</h3>
+
+                <p><strong>Date:</strong> 30 August 2026</p>
+
+                <p><strong>Venue:</strong> Auditorium</p>
+
+                <p>Dance, Singing, Drama & Fun Events.</p>
+
+                <button class="register-btn">
+                    Register
+                </button>
+
+            </div>
+
+            <div class="dashboard-card">
+
+                <h3>⚽ Sports Meet</h3>
+
+                <p><strong>Date:</strong> 5 September 2026</p>
+
+                <p><strong>Venue:</strong> College Ground</p>
+
+                <p>Cricket, Football, Volleyball & Athletics.</p>
+
+                <button class="register-btn">
+                    Register
+                </button>
+
+            </div>
+
+            <div class="dashboard-card">
+
+                <h3>📚 Technical Seminar</h3>
+
+                <p><strong>Date:</strong> 12 September 2026</p>
+
+                <p><strong>Venue:</strong> Conference Hall</p>
+
+                <p>Latest Technologies & Industry Trends.</p>
+
+                <button class="register-btn">
+                    Register
+                </button>
+
+            </div>
+
+            <div class="dashboard-card">
+
+                <h3>🎤 Placement Drive</h3>
+
+                <p><strong>Date:</strong> 20 September 2026</p>
+
+                <p><strong>Venue:</strong> Placement Cell</p>
+
+                <p>Campus Recruitment by Top Companies.</p>
+
+                <button class="register-btn">
+                    Register
+                </button>
+
+            </div>
+
+        </section>
+
+        <br>
+
+        <!-- Registered Events -->
+
+        <section class="card">
+
+            <h3>My Registered Events</h3>
+
+            <table class="notes-table">
+
+                <thead>
+
+                    <tr>
+
+                        <th>S.No</th>
+                        <th>Event Name</th>
+                        <th>Date</th>
+                        <th>Status</th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody id="registeredEvents">
+
+                </tbody>
+
+            </table>
+
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+
+    <footer>
+
+        <p>
+            © 2026 CampusConnect | AI Smart Campus Platform
+        </p>
+
+    </footer>
+
+</body>
+
+</html>

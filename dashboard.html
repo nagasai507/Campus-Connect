@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0">
+
+<title>CampusConnect | Dashboard</title>
+
+<!-- Google Font -->
+
+<link rel="preconnect"
+href="https://fonts.googleapis.com">
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap"
+rel="stylesheet">
+
+<!-- Font Awesome -->
+
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+
+<!-- CSS -->
+
+<link rel="stylesheet"
+href="css/dashboard.css">
+
+<link rel="stylesheet"
+href="css/app.css">
+
+</head>
+
+<body>
+
+<div class="dashboard">
+
+<!-- ================= Sidebar ================= -->
+
+<aside class="sidebar">
+
+<div class="sidebar-logo">
+
+<i class="fa-solid fa-graduation-cap"></i>
+
+CampusConnect
+
+</div>
+
+<ul class="sidebar-menu">
+
+<li><a href="dashboard.html" class="active"><i class="fa-solid fa-chart-simple"></i> Dashboard</a></li>
+<li><a href="attendance.html"><i class="fa-solid fa-calendar-check"></i> Attendance</a></li>
+<li><a href="notes.html"><i class="fa-solid fa-book-open"></i> Notes</a></li>
+<li><a href="placement.html"><i class="fa-solid fa-briefcase"></i> Placement</a></li>
+<li><a href="results.html"><i class="fa-solid fa-graduation-cap"></i> Results</a></li>
+<li><a href="chatbot.html"><i class="fa-solid fa-robot"></i> AI Chatbot</a></li>
+<li><a href="events.html"><i class="fa-solid fa-calendar-days"></i> Events</a></li>
+<li><a href="bus.html"><i class="fa-solid fa-bus"></i> Bus Tracking</a></li>
+<li><a href="analytics.html"><i class="fa-solid fa-chart-line"></i> Analytics</a></li>
+<li><a href="profile.html"><i class="fa-solid fa-user"></i> Profile</a></li>
+
+</ul>
+
+</aside>
+
+<!-- ================= Main Content ================= -->
+
+<main class="main-content">
+
+<!-- Topbar -->
+
+<div class="topbar">
+
+<button class="sidebar-btn" id="menuToggle">
+<i class="fa-solid fa-bars"></i>
+</button>
+
+<div class="search-box">
+<i class="fa-solid fa-magnifying-glass"></i>
+<input type="text" id="search" placeholder="Search dashboard...">
+</div>
+
+<div class="topbar-actions">
+
+<button class="icon-btn" id="darkMode" title="Toggle dark mode">
+<i class="fa-solid fa-circle-half-stroke"></i>
+</button>
+
+<div class="profile">
+<div class="avatar-circle" id="avatarCircle">S</div>
+<div>
+<h4 id="username">Student</h4>
+<span id="userRole">Student</span>
+</div>
+</div>
+
+<button class="icon-btn" id="logout" title="Logout">
+<i class="fa-solid fa-right-from-bracket"></i>
+</button>
+
+</div>
+
+</div>
+
+<!-- Dashboard Title -->
+
+<div class="dashboard-title">
+
+<h1 id="welcomeMessage">Welcome!</h1>
+
+<p>
+Here's what's happening on campus today &mdash;
+<span id="currentDate"></span>
+&nbsp;|&nbsp;
+<span id="clock"></span>
+</p>
+
+<p style="margin-top:4px;font-size:13px;color:var(--text);">
+Signed in as <span id="userEmail"></span>
+</p>
+
+</div>
+
+<!-- Stats -->
+
+<div class="stats-container">
+
+<div class="dashboard-card">
+<i class="fa-solid fa-user-graduate"></i>
+<h2 id="studentsCount">0</h2>
+<p>Students</p>
+</div>
+
+<div class="dashboard-card">
+<i class="fa-solid fa-chalkboard-user"></i>
+<h2 id="facultyCount">0</h2>
+<p>Faculty</p>
+</div>
+
+<div class="dashboard-card">
+<i class="fa-solid fa-calendar-check"></i>
+<h2 id="attendanceCount">0%</h2>
+<p>Attendance</p>
+</div>
+
+<div class="dashboard-card">
+<i class="fa-solid fa-book-open"></i>
+<h2 id="notesCount">0</h2>
+<p>Notes Shared</p>
+</div>
+
+<div class="dashboard-card">
+<i class="fa-solid fa-briefcase"></i>
+<h2 id="placementCount">0</h2>
+<p>Placements</p>
+</div>
+
+<div class="dashboard-card">
+<i class="fa-solid fa-calendar-days"></i>
+<h2 id="eventCount">0</h2>
+<p>Upcoming Events</p>
+</div>
+
+</div>
+
+<!-- Quick Actions -->
+
+<div class="quick-actions">
+
+<div class="action-box quick-btn" data-action="navigate" data-target="attendance.html">
+<i class="fa-solid fa-calendar-check"></i>
+<h4>Mark Attendance</h4>
+</div>
+
+<div class="action-box quick-btn" data-action="navigate" data-target="notes.html">
+<i class="fa-solid fa-book-open"></i>
+<h4>Upload Notes</h4>
+</div>
+
+<div class="action-box quick-btn" data-action="navigate" data-target="chatbot.html">
+<i class="fa-solid fa-robot"></i>
+<h4>Ask AI Chatbot</h4>
+</div>
+
+<div class="action-box quick-btn" data-action="report">
+<i class="fa-solid fa-file-lines"></i>
+<h4>Download Report</h4>
+</div>
+
+</div>
+
+<!-- Attendance + Notifications -->
+
+<div class="dashboard-grid-2">
+
+<div class="attendance-box">
+
+<div class="attendance-header">
+<h3>Today's Attendance</h3>
+<span class="percentage">94%</span>
+</div>
+
+<div class="progress-bar">
+<span class="attendance-progress" style="width:0%"></span>
+</div>
+
+</div>
+
+<div class="notification-panel">
+
+<h3 style="margin-bottom:15px;">Notifications</h3>
+
+<ul id="notificationList" style="list-style:none;"></ul>
+
+</div>
+
+</div>
+
+</main>
+
+</div>
+
+<script src="js/dashboard.js"></script>
+
+</body>
+
+</html>

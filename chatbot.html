@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>CampusConnect | AI Chatbot</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/app.css">
+
+    <script src="js/chatbot.js" defer></script>
+
+</head>
+
+<body>
+
+    <!-- Header -->
+
+    <header class="header">
+
+        <div class="logo">
+            <h1>CampusConnect</h1>
+        </div>
+
+        <nav>
+
+            <a href="dashboard.html">Dashboard</a>
+            <a href="attendance.html">Attendance</a>
+            <a href="notes.html">Notes</a>
+            <a href="placement.html">Placement</a>
+            <a href="results.html">Results</a>
+            <a href="chatbot.html" class="active">AI Chatbot</a>
+            <a href="profile.html">Profile</a>
+            <a href="login.html">Logout</a>
+
+        </nav>
+
+    </header>
+
+    <!-- Main -->
+
+    <main class="container">
+
+        <section class="card">
+
+            <h2>🤖 AI Campus Assistant</h2>
+
+            <p>
+                Ask questions about attendance, notes, placements,
+                exams, faculty, buses, events, and more.
+            </p>
+
+            <div class="ollama-settings">
+                <label for="ollamaModel">Ollama model</label>
+                <input id="ollamaModel" type="text" value="llama3.1:8b" autocomplete="off">
+                <span id="ollamaStatus" class="ollama-status">Local AI not connected</span>
+            </div>
+
+            <div class="chat-container">
+
+                <!-- Chat Messages -->
+
+                <div id="chatBox" class="chat-box">
+
+                </div>
+
+                <!-- Chat Input -->
+
+                <div class="chat-input">
+
+                    <input
+                        type="text"
+                        id="messageInput"
+                        placeholder="Type your question..."
+                        autocomplete="off"
+                    >
+
+                    <button id="sendBtn">
+                        Send
+                    </button>
+
+                    <button id="clearChat">
+                        Clear
+                    </button>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- Quick Questions -->
+
+        <section class="card">
+
+            <h3>Quick Questions</h3>
+
+            <div class="quick-buttons">
+
+                <button class="quick-btn" onclick="document.getElementById('messageInput').value='Attendance';document.getElementById('sendBtn').click();">
+                    Attendance
+                </button>
+
+                <button class="quick-btn" onclick="document.getElementById('messageInput').value='Notes';document.getElementById('sendBtn').click();">
+                    Notes
+                </button>
+
+                <button class="quick-btn" onclick="document.getElementById('messageInput').value='Placement';document.getElementById('sendBtn').click();">
+                    Placement
+                </button>
+
+                <button class="quick-btn" onclick="document.getElementById('messageInput').value='Exam';document.getElementById('sendBtn').click();">
+                    Exams
+                </button>
+
+                <button class="quick-btn" onclick="document.getElementById('messageInput').value='Bus';document.getElementById('sendBtn').click();">
+                    Bus
+                </button>
+
+                <button class="quick-btn" onclick="document.getElementById('messageInput').value='Events';document.getElementById('sendBtn').click();">
+                    Events
+                </button>
+
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+
+    <footer>
+
+        <p>
+            © 2026 CampusConnect | AI Smart Campus Platform
+        </p>
+
+    </footer>
+
+</body>
+
+</html>

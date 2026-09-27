@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>CampusConnect | Notes Sharing</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/app.css">
+
+    <script src="js/notes.js" defer></script>
+
+</head>
+
+<body>
+
+    <!-- Header -->
+
+    <header class="header">
+
+        <h1>CampusConnect</h1>
+
+        <nav>
+            <a href="dashboard.html">Dashboard</a>
+            <a href="attendance.html">Attendance</a>
+            <a href="notes.html" class="active">Notes</a>
+            <a href="placement.html">Placement</a>
+            <a href="results.html">Results</a>
+            <a href="chatbot.html">AI Chatbot</a>
+            <a href="profile.html">Profile</a>
+            <a href="login.html">Logout</a>
+        </nav>
+
+    </header>
+
+    <!-- Main -->
+
+    <main class="container">
+
+        <h2>📚 Notes Sharing Portal</h2>
+
+        <!-- Upload Form -->
+
+        <section class="card">
+
+            <h3>Upload Notes</h3>
+
+            <form id="noteForm">
+
+                <div class="form-group">
+
+                    <label>Subject</label>
+
+                    <input
+                        type="text"
+                        id="subject"
+                        placeholder="Enter Subject Name"
+                        required>
+
+                </div>
+
+                <div class="form-group">
+
+                    <label>Title</label>
+
+                    <input
+                        type="text"
+                        id="title"
+                        placeholder="Enter Note Title"
+                        required>
+
+                </div>
+
+                <div class="form-group">
+
+                    <label>Select File</label>
+
+                    <input
+                        type="file"
+                        id="noteFile"
+                        accept=".pdf,.doc,.docx,.ppt,.pptx"
+                        required>
+
+                </div>
+
+                <button type="submit" class="btn">
+                    Upload Notes
+                </button>
+
+            </form>
+
+        </section>
+
+        <br>
+
+        <!-- Search -->
+
+        <section class="card">
+
+            <input
+                type="text"
+                id="searchNotes"
+                placeholder="🔍 Search Notes...">
+
+            <button id="clearNotes" class="btn-danger">
+                Clear All
+            </button>
+
+        </section>
+
+        <br>
+
+        <!-- Notes Table -->
+
+        <section class="card">
+
+            <h3>Available Notes</h3>
+
+            <table class="notes-table">
+
+                <thead>
+
+                    <tr>
+
+                        <th>S.No</th>
+                        <th>Subject</th>
+                        <th>Title</th>
+                        <th>File Name</th>
+                        <th>Date</th>
+                        <th>Action</th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody id="notesTable">
+
+                </tbody>
+
+            </table>
+
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+
+    <footer>
+
+        <p>
+            © 2026 CampusConnect | AI Smart Campus Platform
+        </p>
+
+    </footer>
+
+</body>
+
+</html>
