@@ -97,14 +97,13 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     // Login Submit
-    loginForm.addEventListener("submit", function (event) {
+    loginForm.addEventListener("submit", async function (event) {
 
         event.preventDefault();
 
         const email = emailInput.value.trim();
         const password = passwordInput.value.trim();
 
-        // Validation
         if (email === "" || password === "") {
             alert("Please enter email and password.");
             return;
@@ -118,7 +117,44 @@ document.addEventListener("DOMContentLoaded", function () {
             return;
         }
 
-        // Demo Users
+        try {
+            const response = await fetch("http://localhost:5000/api/login", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ email, password })
+            });
+
+            const result = await response.json();
+
+            if (!response.ok) {
+                throw new Error(result.message || "Login failed.");
+            }
+
+            const user = result.user;
+
+            localStorage.setItem("isLoggedIn", "true");
+            localStorage.setItem("username", user.name);
+            localStorage.setItem("email", user.email);
+            localStorage.setItem("role", user.role);
+            localStorage.setItem("rollNumber", user.rollNumber || "");
+            localStorage.setItem("branch", user.branch || "");
+            localStorage.setItem("year", user.year || "");
+
+            if (rememberCheckbox && rememberCheckbox.checked) {
+                localStorage.setItem("rememberEmail", email);
+            } else {
+                localStorage.removeItem("rememberEmail");
+            }
+
+            alert("Login Successful!");
+            window.location.href = "dashboard.html";
+            return;
+        } catch (error) {
+            console.error(error);
+        }
+
         const demoUsers = [
             {
                 name: "Student",
@@ -143,10 +179,7 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         ];
 
-        // Registered Users (from register.html)
-        const registeredUsers =
-            JSON.parse(localStorage.getItem("users")) || [];
-
+        const registeredUsers = JSON.parse(localStorage.getItem("users")) || [];
         const users = demoUsers.concat(registeredUsers);
 
         const user = users.find(function (u) {
@@ -162,7 +195,6 @@ document.addEventListener("DOMContentLoaded", function () {
             return;
         }
 
-        // Save Login
         localStorage.setItem("isLoggedIn", "true");
         localStorage.setItem("username", user.name);
         localStorage.setItem("email", user.email);
@@ -171,7 +203,6 @@ document.addEventListener("DOMContentLoaded", function () {
         localStorage.setItem("branch", user.branch || "");
         localStorage.setItem("year", user.year || "");
 
-        // Remember Email
         if (rememberCheckbox && rememberCheckbox.checked) {
             localStorage.setItem("rememberEmail", email);
         } else {
@@ -179,8 +210,6 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         alert("Login Successful!");
-
-        // Redirect
         window.location.href = "dashboard.html";
 
     });

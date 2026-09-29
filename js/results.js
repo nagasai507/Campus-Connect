@@ -18,6 +18,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const username = localStorage.getItem("username") || "Student";
     const email = (localStorage.getItem("email") || "").toLowerCase();
     const rollNumber = localStorage.getItem("rollNumber") || "";
+    let registeredUsers = JSON.parse(localStorage.getItem("users") || "[]");
+    let databaseResults = [];
+    let shouldMigrateResults = false;
 
     const resultsTitle = document.getElementById("resultsTitle");
     const resultsSubtitle = document.getElementById("resultsSubtitle");
@@ -40,16 +43,30 @@ document.addEventListener("DOMContentLoaded", () => {
     // Data helpers
     // ----------------------------
     function getResults() {
-        return JSON.parse(localStorage.getItem("resultsData")) || [];
+        return JSON.parse(localStorage.getItem("resultsData") || "[]");
     }
 
     function saveResults(data) {
+        const previous = databaseResults;
+        databaseResults = data;
         localStorage.setItem("resultsData", JSON.stringify(data));
+        if (!window.CampusApi) return;
+
+        const nextIds = new Set(data.map(record => String(record.id)));
+        const pending = data.map(record => CampusApi.save(
+            "result",
+            record.email || email,
+            record.id,
+            record
+        ));
+        previous.filter(record => !nextIds.has(String(record.id))).forEach(record => {
+            pending.push(CampusApi.remove("result", record.email || email, record.id));
+        });
+        Promise.all(pending).catch(error => console.warn("Results database save skipped:", error.message));
     }
 
     function getRegisteredStudents() {
-        const users = JSON.parse(localStorage.getItem("users") || "[]");
-        return users.filter(user => user.role === "Student");
+        return registeredUsers.filter(user => user.role === "Student");
     }
 
     function isRegisteredStudent(result) {
@@ -74,11 +91,13 @@ document.addEventListener("DOMContentLoaded", () => {
     // Remove legacy demo results so only registered students appear.
     // ----------------------------
     function seedResultsIfNeeded() {
-        const results = getResults().filter(isRegisteredStudent);
-        saveResults(results);
+        const existingResults = getResults();
+        const validResults = existingResults.filter(isRegisteredStudent);
+        if (validResults.length !== existingResults.length || shouldMigrateResults) {
+            shouldMigrateResults = false;
+            saveResults(validResults);
+        }
     }
-
-    seedResultsIfNeeded();
 
     // ==================================================
     // Shared: dropdown builder
@@ -560,7 +579,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 return;
             }
 
-            const registeredStudent = getRegisteredStudents().some(student =>
+            const registeredStudent = getRegisteredStudents().find(student =>
                 (emailVal && student.email && emailVal === student.email.toLowerCase()) ||
                 (rollVal && student.rollNumber && rollVal === student.rollNumber)
             );
@@ -600,7 +619,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 id: recordId,
                 rollNumber: rollVal,
                 studentName: nameVal,
-                email: emailVal,
+                email: emailVal || registeredStudent.email,
                 branch: branchVal,
                 year: yearVal,
                 semester: semVal,
@@ -765,15 +784,56 @@ document.addEventListener("DOMContentLoaded", () => {
 
     }
 
-    // ==================================================
-    // Route by role
-    // ==================================================
-    if (role === "Admin") {
-        renderAdminPortal();
-    } else if (role === "Faculty") {
-        renderFacultyPortal();
-    } else {
-        renderStudentPortal();
+    async function initializeResults() {
+        try {
+            const response = await fetch("http://localhost:5000/api/users");
+            if (response.ok) {
+                const data = await response.json();
+                if (Array.isArray(data.users)) {
+                    registeredUsers = data.users;
+                    localStorage.setItem("users", JSON.stringify(registeredUsers));
+                }
+            }
+        } catch (error) {
+            console.warn("Results roster sync skipped:", error.message);
+        }
+
+        if (window.CampusApi) {
+            try {
+                const records = await CampusApi.list("result", role === "Student" ? email : "");
+                if (records.length) {
+                    databaseResults = records.map(record => record.payload);
+                    localStorage.setItem("resultsData", JSON.stringify(databaseResults));
+                } else {
+                    shouldMigrateResults = true;
+                    const cachedResults = getResults();
+                    databaseResults = role === "Student"
+                        ? cachedResults.filter(record =>
+                            (email && record.email && record.email.toLowerCase() === email) ||
+                            (rollNumber && record.rollNumber === rollNumber)
+                        )
+                        : cachedResults;
+                    localStorage.setItem("resultsData", JSON.stringify(databaseResults));
+                }
+            } catch (error) {
+                console.warn("Results database load skipped:", error.message);
+                databaseResults = getResults();
+            }
+        } else {
+            databaseResults = getResults();
+        }
+
+        seedResultsIfNeeded();
+
+        if (role === "Admin") {
+            renderAdminPortal();
+        } else if (role === "Faculty") {
+            renderFacultyPortal();
+        } else {
+            renderStudentPortal();
+        }
     }
+
+    initializeResults();
 
 });

@@ -27,13 +27,36 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // User Details
     const username = localStorage.getItem("username") || "Student";
+    const email = localStorage.getItem("email") || "";
     const role = localStorage.getItem("role") || "Student";
     const isFaculty = role === "Faculty";
     const isStaff = isFaculty || role === "Admin";
 
+    const syncUserFromDb = async () => {
+        if (!email) return;
+
+        try {
+            const response = await fetch(`http://localhost:5000/api/user?email=${encodeURIComponent(email)}`);
+            if (!response.ok) return;
+
+            const result = await response.json();
+            if (!result.user) return;
+
+            const dbUser = result.user;
+            localStorage.setItem("username", dbUser.name || username);
+            localStorage.setItem("email", dbUser.email || email);
+            localStorage.setItem("role", dbUser.role || role);
+            if (studentName) studentName.textContent = dbUser.name || username;
+        } catch (error) {
+            console.warn("Attendance user sync skipped:", error.message);
+        }
+    };
+
     if (studentName) {
         studentName.textContent = username;
     }
+
+    syncUserFromDb();
 
     if (isStaff) {
         const title = document.querySelector(".attendance-card h2");
@@ -111,7 +134,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // ----------------------------
     // Save Attendance
     // ----------------------------
-    function saveAttendance(status) {
+    async function saveAttendance(status) {
 
         const alreadyMarked = attendance.find(item => item.date === today);
 
@@ -126,6 +149,14 @@ document.addEventListener("DOMContentLoaded", () => {
         });
 
         localStorage.setItem(storageKey, JSON.stringify(attendance));
+
+        if (window.CampusApi && email) {
+            try {
+                await CampusApi.save("attendance", email, today, { date: today, status: status });
+            } catch (error) {
+                console.warn("Attendance database save skipped:", error.message);
+            }
+        }
 
         alert("Attendance Marked Successfully.");
 
@@ -167,9 +198,31 @@ document.addEventListener("DOMContentLoaded", () => {
 
     }
 
-    function loadStaffAttendance() {
-        const users = JSON.parse(localStorage.getItem("users") || "[]")
-            .filter(user => user.role === "Student");
+    async function loadStaffAttendance() {
+        let users = JSON.parse(localStorage.getItem("users") || "[]").filter(user => user.role === "Student");
+        let attendanceRecords = [];
+
+        try {
+            const response = await fetch("http://localhost:5000/api/users");
+            if (response.ok) {
+                const result = await response.json();
+                if (Array.isArray(result.users)) {
+                    users = result.users.filter(user => user.role === "Student");
+                    localStorage.setItem("users", JSON.stringify(result.users));
+                }
+            }
+        } catch (error) {
+            console.warn("Faculty roster fallback to local storage:", error.message);
+        }
+
+        if (window.CampusApi) {
+            try {
+                attendanceRecords = await CampusApi.list("attendance");
+            } catch (error) {
+                console.warn("Faculty attendance fallback to local storage:", error.message);
+            }
+        }
+
         const visibleUsers = users.filter(student => {
             const searchText = (student.name + " " + (student.rollNumber || "")).toLowerCase();
             return !facultySearch || searchText.includes(facultySearch);
@@ -185,7 +238,13 @@ document.addEventListener("DOMContentLoaded", () => {
             }
 
             users.forEach((student, index) => {
-                const records = JSON.parse(localStorage.getItem("attendance_" + student.name) || "[]");
+                const databaseRecords = attendanceRecords
+                    .filter(record => record.email === (student.email || "").toLowerCase())
+                    .map(record => record.payload);
+                const records = databaseRecords.length
+                    ? databaseRecords
+                    : JSON.parse(localStorage.getItem("attendance_" + student.name) || "[]");
+                localStorage.setItem("attendance_" + student.name, JSON.stringify(records));
                 const present = records.filter(record => record.status === "Present").length;
                 const absent = records.filter(record => record.status === "Absent").length;
                 const total = present + absent;
@@ -236,10 +295,11 @@ document.addEventListener("DOMContentLoaded", () => {
         if (statusMessage) statusMessage.textContent = "Statuses updated on screen. Click Save Attendance to apply them.";
     }
 
-    function saveFacultyAttendance() {
+    async function saveFacultyAttendance() {
         const users = JSON.parse(localStorage.getItem("users") || "[]")
             .filter(user => user.role === "Student");
         let savedCount = 0;
+        const pendingSaves = [];
 
         document.querySelectorAll(".faculty-status-select").forEach(select => {
             if (!select.dataset.changed || !select.value) return;
@@ -252,8 +312,19 @@ document.addEventListener("DOMContentLoaded", () => {
                 .filter(record => record.date !== facultyDate);
             records.push({ date: facultyDate, status: select.value });
             localStorage.setItem(key, JSON.stringify(records));
+            if (window.CampusApi && student.email) {
+                pendingSaves.push(CampusApi.save("attendance", student.email, facultyDate, {
+                    date: facultyDate,
+                    status: select.value,
+                    studentName: student.name,
+                    rollNumber: student.rollNumber || "",
+                    markedBy: email
+                }).catch(error => console.warn("Faculty attendance database save skipped:", error.message)));
+            }
             savedCount++;
         });
+
+        await Promise.all(pendingSaves);
 
         const statusMessage = document.getElementById("facultyAttendanceStatus");
         if (statusMessage) statusMessage.textContent = savedCount + " student attendance record(s) saved for " + facultyDate + ".";
@@ -317,7 +388,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (resetBtn && isFaculty) {
 
-        resetBtn.addEventListener("click", () => {
+        resetBtn.addEventListener("click", async () => {
 
             const confirmReset =
                 confirm("Reset all attendance records?");
@@ -328,6 +399,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 localStorage.removeItem(storageKey);
 
+                if (window.CampusApi && email) {
+                    try {
+                        await CampusApi.clear("attendance", email);
+                    } catch (error) {
+                        console.warn("Attendance database clear skipped:", error.message);
+                    }
+                }
+
                 loadAttendance();
 
             }
@@ -337,6 +416,22 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // Initial Load
-    loadAttendance();
+    async function loadPersonalAttendance() {
+        if (isStaff || !window.CampusApi || !email) return loadAttendance();
+        try {
+            const records = await CampusApi.list("attendance", email);
+            if (records.length) {
+                attendance = records.map(record => record.payload).sort((a, b) => new Date(a.date) - new Date(b.date));
+            } else if (attendance.length) {
+                await Promise.all(attendance.map(record => CampusApi.save("attendance", email, record.date, record)));
+            }
+            localStorage.setItem(storageKey, JSON.stringify(attendance));
+        } catch (error) {
+            console.warn("Attendance database load skipped:", error.message);
+        }
+        loadAttendance();
+    }
+
+    loadPersonalAttendance();
 
 });

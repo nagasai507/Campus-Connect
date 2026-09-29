@@ -18,7 +18,7 @@ CampusConnect is a responsive, multi-page campus portal concept that brings ever
 
 ## Run It Locally
 
-There is no install or build step. Clone the repository and open `index.html` in a browser:
+To run the static pages only, clone the repository and open `index.html` in a browser:
 
 ```bash
 git clone https://github.com/nagasai507/Campus-Connect.git
@@ -32,6 +32,51 @@ python -m http.server 8000
 ```
 
 Then visit [http://localhost:8000](http://localhost:8000). The pages load fonts, icons, and animation assets from CDNs, so an internet connection is needed for those external resources.
+
+## MongoDB Backend
+
+The project includes a Node.js + MongoDB backend for authentication and portal records.
+
+### 1) Install dependencies
+
+```bash
+npm install
+```
+
+### 2) Start MongoDB locally
+
+If MongoDB is installed locally, start it:
+
+```bash
+mongod
+```
+
+Copy the example environment file and set `MONGODB_URI` for your database. Keep your real `.env` file private; it is ignored by Git.
+
+```bash
+copy .env.example .env
+```
+
+Default connection:
+
+```env
+PORT=5000
+MONGODB_URI=mongodb://127.0.0.1:27017/campusconnect
+```
+
+### 3) Run the backend and portal
+
+```bash
+npm start
+```
+
+The Express server hosts the portal and API at `http://localhost:5000`. The API includes:
+
+- `http://localhost:5000/api/health`
+- `GET http://localhost:5000/api/users`
+- `POST http://localhost:5000/api/register`
+- `POST http://localhost:5000/api/login`
+- `GET/PUT/DELETE http://localhost:5000/api/records/:kind`
 
 ## Project Map
 

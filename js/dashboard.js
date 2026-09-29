@@ -25,24 +25,45 @@ document.addEventListener("DOMContentLoaded", () => {
     const emailElement = document.getElementById("userEmail");
     const roleElement = document.getElementById("userRole");
 
-    if (usernameElement) usernameElement.textContent = username;
-    if (emailElement) emailElement.textContent = email;
-    if (roleElement) roleElement.textContent = role;
+    const applyUserDetails = (userName, userEmail, userRole) => {
+        if (usernameElement) usernameElement.textContent = userName || "Student";
+        if (emailElement) emailElement.textContent = userEmail || "";
+        if (roleElement) roleElement.textContent = userRole || "Student";
 
-    const avatarCircle = document.getElementById("avatarCircle");
+        const avatarCircle = document.getElementById("avatarCircle");
+        if (avatarCircle) {
+            avatarCircle.textContent = (userName || "Student").trim().charAt(0).toUpperCase() || "S";
+        }
 
-    if (avatarCircle) {
-        avatarCircle.textContent = username.trim().charAt(0).toUpperCase() || "S";
-    }
+        const welcome = document.getElementById("welcomeMessage");
+        if (welcome) {
+            welcome.textContent = `Welcome, ${userName || "Student"}!`;
+        }
+    };
 
-    // ===========================
-    // Welcome Message
-    // ===========================
-    const welcome = document.getElementById("welcomeMessage");
+    applyUserDetails(username, email, role);
 
-    if (welcome) {
-        welcome.textContent = `Welcome, ${username}!`;
-    }
+    const syncUserFromDb = async () => {
+        if (!email) return;
+
+        try {
+            const response = await fetch(`http://localhost:5000/api/user?email=${encodeURIComponent(email)}`);
+            if (!response.ok) return;
+
+            const result = await response.json();
+            if (!result.user) return;
+
+            const dbUser = result.user;
+            localStorage.setItem("username", dbUser.name || username);
+            localStorage.setItem("email", dbUser.email || email);
+            localStorage.setItem("role", dbUser.role || role);
+            applyUserDetails(dbUser.name || username, dbUser.email || email, dbUser.role || role);
+        } catch (error) {
+            console.warn("Dashboard user sync skipped:", error.message);
+        }
+    };
+
+    syncUserFromDb();
 
     // ===========================
     // Current Date
@@ -76,24 +97,40 @@ document.addEventListener("DOMContentLoaded", () => {
     // ===========================
     // Dashboard Statistics
     // ===========================
-    const registeredUsers = JSON.parse(localStorage.getItem("users") || "[]");
-    const stats = {
+    const loadStats = async () => {
+        let registeredUsers = JSON.parse(localStorage.getItem("users") || "[]");
 
-        students: registeredUsers.filter(user => user.role === "Student").length,
-        faculty: registeredUsers.filter(user => user.role === "Faculty").length,
-        attendance: 94,
-        notes: 620,
-        placements: 180,
-        events: 16
+        try {
+            const response = await fetch("http://localhost:5000/api/users");
+            if (response.ok) {
+                const result = await response.json();
+                if (Array.isArray(result.users)) {
+                    registeredUsers = result.users;
+                    localStorage.setItem("users", JSON.stringify(registeredUsers));
+                }
+            }
+        } catch (error) {
+            console.warn("Dashboard stats fallback to local storage:", error.message);
+        }
 
+        const stats = {
+            students: registeredUsers.filter(user => user.role === "Student").length,
+            faculty: registeredUsers.filter(user => user.role === "Faculty").length,
+            attendance: 94,
+            notes: 620,
+            placements: 180,
+            events: 16
+        };
+
+        setStat("studentsCount", stats.students);
+        setStat("facultyCount", stats.faculty);
+        setStat("attendanceCount", stats.attendance + "%");
+        setStat("notesCount", stats.notes);
+        setStat("placementCount", stats.placements);
+        setStat("eventCount", stats.events);
     };
 
-    setStat("studentsCount", stats.students);
-    setStat("facultyCount", stats.faculty);
-    setStat("attendanceCount", stats.attendance + "%");
-    setStat("notesCount", stats.notes);
-    setStat("placementCount", stats.placements);
-    setStat("eventCount", stats.events);
+    loadStats();
 
     function setStat(id, value) {
 

@@ -12,8 +12,31 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     const username = localStorage.getItem("username") || "Student";
+    const email = localStorage.getItem("email") || "";
+    const role = localStorage.getItem("role") || "Student";
     const OLLAMA_URL = "http://localhost:11434/api/chat";
     const OLLAMA_MODEL = "llama3.1:8b";
+
+    const syncUserFromDb = async () => {
+        if (!email) return;
+
+        try {
+            const response = await fetch(`http://localhost:5000/api/user?email=${encodeURIComponent(email)}`);
+            if (!response.ok) return;
+
+            const result = await response.json();
+            if (!result.user) return;
+
+            const dbUser = result.user;
+            localStorage.setItem("username", dbUser.name || username);
+            localStorage.setItem("email", dbUser.email || email);
+            localStorage.setItem("role", dbUser.role || role);
+        } catch (error) {
+            console.warn("Placement user sync skipped:", error.message);
+        }
+    };
+
+    syncUserFromDb();
 
     const overlay = document.getElementById("moduleOverlay");
     const moduleContent = document.getElementById("moduleContent");
@@ -476,9 +499,22 @@ document.addEventListener("DOMContentLoaded", () => {
     // 4. RESUME BUILDER (real live preview + download)
     // ==================================================
 
-    function startResume() {
+    async function startResume() {
 
-        const savedData = JSON.parse(localStorage.getItem("resumeData_" + username) || "{}");
+        let savedData = JSON.parse(localStorage.getItem("resumeData_" + username) || "{}");
+        if (window.CampusApi && email) {
+            try {
+                const records = await CampusApi.list("resume", email);
+                if (records.length) {
+                    savedData = records[0].payload;
+                    localStorage.setItem("resumeData_" + username, JSON.stringify(savedData));
+                } else if (Object.keys(savedData).length) {
+                    await CampusApi.save("resume", email, "profile", savedData);
+                }
+            } catch (error) {
+                console.warn("Resume database load skipped:", error.message);
+            }
+        }
 
         moduleContent.innerHTML = `
             <h2>📄 Resume Builder</h2>
@@ -513,6 +549,7 @@ document.addEventListener("DOMContentLoaded", () => {
             };
         }
 
+        let saveTimer;
         function renderPreview() {
 
             const d = getData();
@@ -527,6 +564,14 @@ document.addEventListener("DOMContentLoaded", () => {
             `;
 
             localStorage.setItem("resumeData_" + username, JSON.stringify(d));
+
+            clearTimeout(saveTimer);
+            saveTimer = setTimeout(() => {
+                if (window.CampusApi && email) {
+                    CampusApi.save("resume", email, "profile", d)
+                        .catch(error => console.warn("Resume database save skipped:", error.message));
+                }
+            }, 300);
 
         }
 
@@ -730,8 +775,33 @@ document.addEventListener("DOMContentLoaded", () => {
     const applicationsKey = "jobApplications_" + (localStorage.getItem("email") || username).toLowerCase();
     let applications = JSON.parse(localStorage.getItem(applicationsKey) || "[]");
 
+    async function loadApplications() {
+        if (!window.CampusApi || !email) return;
+        try {
+            const records = await CampusApi.list("application", email);
+            if (records.length) {
+                applications = records.map(record => record.payload);
+            } else if (applications.length) {
+                await Promise.all(applications.map(application =>
+                    CampusApi.save("application", email, application.id, application)
+                ));
+            }
+            localStorage.setItem(applicationsKey, JSON.stringify(applications));
+            renderApplications();
+            updateApplyButtons();
+        } catch (error) {
+            console.warn("Job applications database load skipped:", error.message);
+        }
+    }
+
     function saveApplications() {
         localStorage.setItem(applicationsKey, JSON.stringify(applications));
+        if (window.CampusApi && email) {
+            applications.forEach(application => {
+                CampusApi.save("application", email, application.id, application)
+                    .catch(error => console.warn("Job application database save skipped:", error.message));
+            });
+        }
     }
 
     function applicationKey(company, role) {
@@ -833,5 +903,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     renderApplications();
     updateApplyButtons();
+    loadApplications();
 
 });

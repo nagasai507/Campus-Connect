@@ -24,17 +24,35 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const gridColor = "rgba(255,255,255,.10)";
 
-    const registeredUsers = JSON.parse(localStorage.getItem("users") || "[]");
     const totalStudents = document.getElementById("totalStudents");
     const totalFaculty = document.getElementById("totalFaculty");
 
-    if (totalStudents) {
-        totalStudents.textContent = registeredUsers.filter(user => user.role === "Student").length;
-    }
+    const updateUserCounts = async () => {
+        let registeredUsers = JSON.parse(localStorage.getItem("users") || "[]");
 
-    if (totalFaculty) {
-        totalFaculty.textContent = registeredUsers.filter(user => user.role === "Faculty").length;
-    }
+        try {
+            const response = await fetch("http://localhost:5000/api/users");
+            if (response.ok) {
+                const data = await response.json();
+                if (Array.isArray(data.users)) {
+                    registeredUsers = data.users;
+                    localStorage.setItem("users", JSON.stringify(registeredUsers));
+                }
+            }
+        } catch (error) {
+            console.warn("Analytics roster sync skipped:", error.message);
+        }
+
+        if (totalStudents) {
+            totalStudents.textContent = registeredUsers.filter(user => user.role === "Student").length;
+        }
+
+        if (totalFaculty) {
+            totalFaculty.textContent = registeredUsers.filter(user => user.role === "Faculty").length;
+        }
+    };
+
+    updateUserCounts();
 
     // ----------------------------
     // Attendance Analysis (Line)

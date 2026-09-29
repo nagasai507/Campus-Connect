@@ -4,11 +4,38 @@
 
 document.addEventListener("DOMContentLoaded", () => {
 
-    // Check Login
-    if (localStorage.getItem("isLoggedIn") !== "true") {
+    const publicMode = new URLSearchParams(window.location.search).get("public") === "1";
+    const isAuthenticated = !publicMode && localStorage.getItem("isLoggedIn") === "true";
+
+    if (!publicMode && !isAuthenticated) {
         window.location.href = "login.html";
         return;
     }
+
+    const username = isAuthenticated ? (localStorage.getItem("username") || "Student") : "Guest";
+    const email = isAuthenticated ? (localStorage.getItem("email") || "") : "";
+    const role = isAuthenticated ? (localStorage.getItem("role") || "Student") : "Guest";
+
+    const syncUserFromDb = async () => {
+        if (!isAuthenticated || !email) return;
+
+        try {
+            const response = await fetch(`http://localhost:5000/api/user?email=${encodeURIComponent(email)}`);
+            if (!response.ok) return;
+
+            const result = await response.json();
+            if (!result.user) return;
+
+            const dbUser = result.user;
+            localStorage.setItem("username", dbUser.name || username);
+            localStorage.setItem("email", dbUser.email || email);
+            localStorage.setItem("role", dbUser.role || role);
+        } catch (error) {
+            console.warn("Notes user sync skipped:", error.message);
+        }
+    };
+
+    syncUserFromDb();
 
     const noteForm = document.getElementById("noteForm");
     const subject = document.getElementById("subject");
@@ -17,8 +44,17 @@ document.addEventListener("DOMContentLoaded", () => {
     const notesTable = document.getElementById("notesTable");
     const search = document.getElementById("searchNotes");
     const clearBtn = document.getElementById("clearNotes");
+    const uploadSection = document.getElementById("uploadSection");
 
-    let notes = JSON.parse(localStorage.getItem("campusNotes")) || [];
+    if (!isAuthenticated) {
+        if (uploadSection) {
+            uploadSection.hidden = true;
+            uploadSection.style.display = "none";
+        }
+        if (clearBtn) clearBtn.hidden = true;
+    }
+
+    let notes = JSON.parse(localStorage.getItem("campusNotes") || "[]");
 
     // -------------------------
     // Escape HTML (prevent XSS)
@@ -33,7 +69,27 @@ document.addEventListener("DOMContentLoaded", () => {
     // Save Notes
     // -------------------------
     function saveNotes() {
+        if (!isAuthenticated) return;
         localStorage.setItem("campusNotes", JSON.stringify(notes));
+    }
+
+    async function loadNotes() {
+        if (!window.CampusApi) return;
+        try {
+            const records = await CampusApi.list("note");
+            if (records.length) {
+                notes = records.map(record => ({ ...record.payload, ownerEmail: record.email }));
+            } else if (isAuthenticated && email && notes.length) {
+                notes = notes.map(note => ({ ...note, ownerEmail: note.ownerEmail || email }));
+                await Promise.all(notes
+                    .filter(note => !note.ownerEmail || note.ownerEmail.toLowerCase() === email.toLowerCase())
+                    .map(note => CampusApi.save("note", email, note.id, note)));
+            }
+            saveNotes();
+        } catch (error) {
+            console.warn("Notes database load skipped:", error.message);
+        }
+        displayNotes(search ? search.value : "");
     }
 
     // -------------------------
@@ -64,23 +120,22 @@ document.addEventListener("DOMContentLoaded", () => {
 
             const row = document.createElement("tr");
 
+            const actions = `
+                <a href="${escapeHTML(note.fileURL)}" target="_blank" rel="noopener">View</a>
+                &nbsp;
+                <a href="${escapeHTML(note.fileURL)}" download="${escapeHTML(note.fileName)}">
+                    Download
+                </a>
+                ${isAuthenticated && (!note.ownerEmail || note.ownerEmail.toLowerCase() === email.toLowerCase() || role === "Admin") ? `&nbsp;<button class="deleteBtn" data-id="${note.id}">Delete</button>` : ""}
+            `;
+
             row.innerHTML = `
                 <td>${index + 1}</td>
                 <td>${escapeHTML(note.subject)}</td>
                 <td>${escapeHTML(note.title)}</td>
                 <td>${escapeHTML(note.fileName)}</td>
                 <td>${escapeHTML(note.date)}</td>
-                <td>
-                    <a href="${note.fileURL}" target="_blank">View</a>
-                    &nbsp;
-                    <a href="${note.fileURL}" download="${escapeHTML(note.fileName)}">
-                        Download
-                    </a>
-                    &nbsp;
-                    <button class="deleteBtn" data-id="${note.id}">
-                        Delete
-                    </button>
-                </td>
+                <td>${actions}</td>
             `;
 
             notesTable.appendChild(row);
@@ -90,11 +145,24 @@ document.addEventListener("DOMContentLoaded", () => {
         // Delete Buttons
         document.querySelectorAll(".deleteBtn").forEach(btn => {
 
-            btn.addEventListener("click", () => {
+            btn.addEventListener("click", async () => {
+
+                if (!isAuthenticated) return;
 
                 const id = Number(btn.dataset.id);
 
-                notes = notes.filter(note => note.id !== id);
+                const deletedNote = notes.find(note => String(note.id) === String(id));
+                notes = notes.filter(note => String(note.id) !== String(id));
+
+                if (deletedNote && deletedNote.ownerEmail && deletedNote.ownerEmail.toLowerCase() !== email.toLowerCase()) return;
+
+                if (window.CampusApi) {
+                    try {
+                        await CampusApi.remove("note", email, id);
+                    } catch (error) {
+                        console.warn("Note database delete skipped:", error.message);
+                    }
+                }
 
                 saveNotes();
                 displayNotes(search ? search.value : "");
@@ -110,9 +178,11 @@ document.addEventListener("DOMContentLoaded", () => {
     // -------------------------
     if (noteForm) {
 
-        noteForm.addEventListener("submit", e => {
+        noteForm.addEventListener("submit", async e => {
 
             e.preventDefault();
+
+            if (!isAuthenticated) return;
 
             const subjectValue = subject.value.trim();
             const titleValue = title.value.trim();
@@ -145,7 +215,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             const reader = new FileReader();
 
-            reader.onload = function () {
+            reader.onload = async function () {
 
                 const newNote = {
 
@@ -154,13 +224,22 @@ document.addEventListener("DOMContentLoaded", () => {
                     title: titleValue,
                     fileName: file.name,
                     fileURL: reader.result,
-                    date: new Date().toLocaleDateString()
+                    date: new Date().toLocaleDateString(),
+                    ownerEmail: email
 
                 };
 
                 notes.push(newNote);
 
                 saveNotes();
+
+                if (window.CampusApi) {
+                    try {
+                        await CampusApi.save("note", email, newNote.id, newNote);
+                    } catch (error) {
+                        console.warn("Note database save skipped:", error.message);
+                    }
+                }
 
                 noteForm.reset();
 
@@ -198,11 +277,21 @@ document.addEventListener("DOMContentLoaded", () => {
     // -------------------------
     if (clearBtn) {
 
-        clearBtn.addEventListener("click", () => {
+        clearBtn.addEventListener("click", async () => {
+
+            if (!isAuthenticated) return;
 
             if (confirm("Delete all notes?")) {
 
-                notes = [];
+                notes = notes.filter(note => note.ownerEmail && note.ownerEmail.toLowerCase() !== email.toLowerCase());
+
+                if (window.CampusApi) {
+                    try {
+                        await CampusApi.clear("note", email);
+                    } catch (error) {
+                        console.warn("Notes database clear skipped:", error.message);
+                    }
+                }
 
                 saveNotes();
 
@@ -216,5 +305,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Initial Load
     displayNotes();
+    loadNotes();
 
 });

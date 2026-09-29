@@ -86,7 +86,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // -----------------------------
     if (registerForm) {
 
-        registerForm.addEventListener("submit", (e) => {
+        registerForm.addEventListener("submit", async (e) => {
 
             e.preventDefault();
 
@@ -100,7 +100,6 @@ document.addEventListener("DOMContentLoaded", () => {
             const passwordValue = password.value;
             const confirmValue = confirmPassword.value;
 
-            // Validation
             if (
                 nameValue === "" ||
                 rollValue === "" ||
@@ -143,20 +142,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 return;
             }
 
-            // Existing Users
-            let users = JSON.parse(localStorage.getItem("users")) || [];
-
-            // Duplicate Email Check
-            const exists = users.find(user => user.email === emailValue);
-
-            if (exists) {
-                alert("Email already registered.");
-                return;
-            }
-
-            // Create User
-            const newUser = {
-                id: Date.now(),
+            const payload = {
                 name: nameValue,
                 rollNumber: rollValue,
                 email: emailValue,
@@ -167,13 +153,69 @@ document.addEventListener("DOMContentLoaded", () => {
                 password: passwordValue
             };
 
-            users.push(newUser);
+            try {
+                const response = await fetch("http://localhost:5000/api/register", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(payload)
+                });
 
-            localStorage.setItem("users", JSON.stringify(users));
+                const result = await response.json();
 
-            alert("Registration Successful!");
+                if (!response.ok) {
+                    throw new Error(result.message || "Registration failed.");
+                }
 
-            window.location.href = "login.html";
+                const registeredUser = result.user || payload;
+                const existingUsers = JSON.parse(localStorage.getItem("users") || "[]");
+                const duplicate = existingUsers.find(user => user.email === emailValue);
+
+                if (!duplicate) {
+                    existingUsers.push({
+                        id: registeredUser.id || Date.now(),
+                        name: registeredUser.name || nameValue,
+                        rollNumber: registeredUser.rollNumber || rollValue,
+                        email: registeredUser.email || emailValue,
+                        phone: registeredUser.phone || phoneValue,
+                        branch: registeredUser.branch || branchValue,
+                        year: registeredUser.year || yearValue,
+                        role: registeredUser.role || roleValue,
+                        password: passwordValue
+                    });
+                    localStorage.setItem("users", JSON.stringify(existingUsers));
+                }
+
+                alert("Registration Successful!");
+                window.location.href = "login.html";
+            } catch (error) {
+                console.error(error);
+                let users = JSON.parse(localStorage.getItem("users")) || [];
+
+                const exists = users.find(user => user.email === emailValue);
+                if (exists) {
+                    alert("Email already registered.");
+                    return;
+                }
+
+                const newUser = {
+                    id: Date.now(),
+                    name: nameValue,
+                    rollNumber: rollValue,
+                    email: emailValue,
+                    phone: phoneValue,
+                    branch: branchValue,
+                    year: yearValue,
+                    role: roleValue,
+                    password: passwordValue
+                };
+
+                users.push(newUser);
+                localStorage.setItem("users", JSON.stringify(users));
+                alert("Registration Successful! (Saved locally)");
+                window.location.href = "login.html";
+            }
 
         });
 

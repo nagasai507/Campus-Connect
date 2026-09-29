@@ -14,16 +14,44 @@ document.addEventListener("DOMContentLoaded", () => {
     const email = localStorage.getItem("email") || "student@example.com";
     const role = localStorage.getItem("role") || "Student";
 
-    // ----------------------------
-    // Populate Profile Info
-    // ----------------------------
-    const studentName = document.getElementById("studentName");
-    const studentEmail = document.getElementById("studentEmail");
-    const studentRole = document.getElementById("studentRole");
+    const applyProfileData = (name, userEmail, userRole) => {
+        const studentName = document.getElementById("studentName");
+        const studentEmail = document.getElementById("studentEmail");
+        const studentRole = document.getElementById("studentRole");
 
-    if (studentName) studentName.textContent = username;
-    if (studentEmail) studentEmail.textContent = email;
-    if (studentRole) studentRole.textContent = role;
+        if (studentName) studentName.textContent = name || "Student";
+        if (studentEmail) studentEmail.textContent = userEmail || "";
+        if (studentRole) studentRole.textContent = userRole || "Student";
+
+        const avatarCircle = document.getElementById("avatarCircleLg");
+        if (avatarCircle) {
+            avatarCircle.textContent = (name || "Student").trim().charAt(0).toUpperCase() || "S";
+        }
+    };
+
+    applyProfileData(username, email, role);
+
+    const syncProfileFromDb = async () => {
+        if (!email) return;
+
+        try {
+            const response = await fetch(`http://localhost:5000/api/user?email=${encodeURIComponent(email)}`);
+            if (!response.ok) return;
+
+            const result = await response.json();
+            if (!result.user) return;
+
+            const dbUser = result.user;
+            localStorage.setItem("username", dbUser.name || username);
+            localStorage.setItem("email", dbUser.email || email);
+            localStorage.setItem("role", dbUser.role || role);
+            applyProfileData(dbUser.name || username, dbUser.email || email, dbUser.role || role);
+        } catch (error) {
+            console.warn("Profile sync skipped:", error.message);
+        }
+    };
+
+    syncProfileFromDb();
 
     // ----------------------------
     // Avatar / Profile Photo

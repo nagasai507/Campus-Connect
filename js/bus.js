@@ -4,11 +4,37 @@
 
 document.addEventListener("DOMContentLoaded", () => {
 
-    // Check Login
-    if (localStorage.getItem("isLoggedIn") !== "true") {
+    const publicMode = new URLSearchParams(window.location.search).get("public") === "1";
+
+    if (!publicMode && localStorage.getItem("isLoggedIn") !== "true") {
         window.location.href = "login.html";
         return;
     }
+
+    const username = !publicMode ? (localStorage.getItem("username") || "Student") : "Guest";
+    const email = !publicMode ? (localStorage.getItem("email") || "") : "";
+    const role = !publicMode ? (localStorage.getItem("role") || "Student") : "Guest";
+
+    const syncUserFromDb = async () => {
+        if (publicMode || !email) return;
+
+        try {
+            const response = await fetch(`http://localhost:5000/api/user?email=${encodeURIComponent(email)}`);
+            if (!response.ok) return;
+
+            const result = await response.json();
+            if (!result.user) return;
+
+            const dbUser = result.user;
+            localStorage.setItem("username", dbUser.name || username);
+            localStorage.setItem("email", dbUser.email || email);
+            localStorage.setItem("role", dbUser.role || role);
+        } catch (error) {
+            console.warn("Bus user sync skipped:", error.message);
+        }
+    };
+
+    syncUserFromDb();
 
     const searchBus = document.getElementById("searchBus");
     const busContainer = document.getElementById("busContainer");

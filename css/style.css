@@ -772,13 +772,37 @@ box-shadow:0 20px 40px rgba(0,0,0,.30);
 
     display:grid;
 
-    grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+    grid-template-columns:repeat(3,minmax(0,1fr));
 
     gap:30px;
 
 }
 
+@media(max-width:900px){
+
+    .floating-cards{
+
+        grid-template-columns:repeat(2,minmax(0,1fr));
+
+    }
+
+}
+
+@media(max-width:560px){
+
+    .floating-cards{
+
+        grid-template-columns:1fr;
+
+        gap:18px;
+
+    }
+
+}
+
 .card{
+
+    display:block;
 
     position:relative;
 
@@ -798,11 +822,23 @@ box-shadow:0 20px 40px rgba(0,0,0,.30);
 
     text-align:center;
 
+    color:inherit;
+
+    text-decoration:none;
+
     cursor:pointer;
 
     transition:.4s;
 
     box-shadow:0 15px 35px rgba(0,0,0,.20);
+
+}
+
+.card:focus-visible{
+
+    outline:3px solid #00e5ff;
+
+    outline-offset:4px;
 
 }
 

@@ -4,8 +4,10 @@
 
 document.addEventListener("DOMContentLoaded", () => {
 
-    // Check Login
-    if (localStorage.getItem("isLoggedIn") !== "true") {
+    const publicMode = new URLSearchParams(window.location.search).get("public") === "1";
+    const isAuthenticated = !publicMode && localStorage.getItem("isLoggedIn") === "true";
+
+    if (!publicMode && !isAuthenticated) {
         window.location.href = "login.html";
         return;
     }
@@ -18,13 +20,35 @@ document.addEventListener("DOMContentLoaded", () => {
     const ollamaStatus = document.getElementById("ollamaStatus");
 
     const OLLAMA_URL = "http://localhost:11434/api/chat";
-    const username = localStorage.getItem("username") || "Student";
-    const email = localStorage.getItem("email") || "";
-    const role = localStorage.getItem("role") || "Student";
-    const chatStorageKey = "chatHistory_" + (email || username).toLowerCase();
+    const username = isAuthenticated ? (localStorage.getItem("username") || "Student") : "Guest";
+    const email = isAuthenticated ? (localStorage.getItem("email") || "") : "";
+    const role = isAuthenticated ? (localStorage.getItem("role") || "Student") : "Guest";
+
+    const syncUserFromDb = async () => {
+        if (!isAuthenticated || !email) return;
+
+        try {
+            const response = await fetch(`http://localhost:5000/api/user?email=${encodeURIComponent(email)}`);
+            if (!response.ok) return;
+
+            const result = await response.json();
+            if (!result.user) return;
+
+            const dbUser = result.user;
+            localStorage.setItem("username", dbUser.name || username);
+            localStorage.setItem("email", dbUser.email || email);
+            localStorage.setItem("role", dbUser.role || role);
+        } catch (error) {
+            console.warn("Chatbot user sync skipped:", error.message);
+        }
+    };
+
+    syncUserFromDb();
+    const chatStorage = publicMode ? sessionStorage : localStorage;
+    const chatStorageKey = publicMode ? "publicChatHistory" : "chatHistory_" + (email || username).toLowerCase();
 
     let chatHistory =
-        JSON.parse(localStorage.getItem(chatStorageKey) || "[]");
+        JSON.parse(chatStorage.getItem(chatStorageKey) || "[]");
 
     // ---------------------------
     // Escape HTML (prevent XSS)
@@ -39,10 +63,20 @@ document.addEventListener("DOMContentLoaded", () => {
     // Save Chat
     // ---------------------------
     function saveChat() {
-        localStorage.setItem(chatStorageKey, JSON.stringify(chatHistory));
+        chatStorage.setItem(chatStorageKey, JSON.stringify(chatHistory));
     }
 
     function getPortalContext() {
+        if (!isAuthenticated) {
+            return {
+                account: { name: "Guest", role: "Guest" },
+                portalCapabilities: [
+                    "General campus information",
+                    "Events and campus activities"
+                ]
+            };
+        }
+
         const readJSON = (key, fallback) => {
             try {
                 return JSON.parse(localStorage.getItem(key) || "null") || fallback;
@@ -159,7 +193,10 @@ document.addEventListener("DOMContentLoaded", () => {
             role: chat.sender === "user" ? "user" : "assistant",
             content: chat.message
         }));
-        const systemPrompt = `You are CampusBot, a friendly, natural conversational assistant inside CampusConnect. Respond normally to greetings, casual questions, and follow-up questions. Keep answers clear and concise. You have access to the logged-in user's private portal snapshot below. For portal questions, use the snapshot instead of guessing: for attendance, state present, absent, total marked, and percentage; for results, list semester status, SGPA, and subject marks; for notes, events, placement, and account questions, use the supplied details. If a requested value is empty or unavailable, say that plainly and name the relevant portal section. Never invent records, never reveal passwords, and never reveal other users' private data.\n\nPORTAL SNAPSHOT:\n${JSON.stringify(getPortalContext())}`;
+        const accountInstructions = isAuthenticated
+            ? "Use the logged-in user's private portal snapshot for personal portal questions. Never invent records, reveal passwords, or reveal other users' private data."
+            : "You are assisting a guest. Answer general campus questions only; do not claim access to student, faculty, or admin records. For private account questions, explain that sign-in is required.";
+        const systemPrompt = `You are CampusBot, a friendly conversational assistant inside CampusConnect. Respond naturally to greetings, casual questions, and follow-ups. Keep answers clear and concise. ${accountInstructions}\n\nPORTAL CONTEXT:\n${JSON.stringify(getPortalContext())}`;
 
         ollamaStatus.textContent = "Thinking with Ollama...";
         ollamaStatus.className = "ollama-status is-thinking";
