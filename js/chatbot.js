@@ -4,8 +4,8 @@
 
 document.addEventListener("DOMContentLoaded", () => {
 
-    const publicMode = new URLSearchParams(window.location.search).get("public") === "1";
-    const isAuthenticated = !publicMode && localStorage.getItem("isLoggedIn") === "true";
+    const isAuthenticated = localStorage.getItem("isLoggedIn") === "true";
+    const publicMode = !isAuthenticated && new URLSearchParams(window.location.search).get("public") === "1";
 
     if (!publicMode && !isAuthenticated) {
         window.location.href = "login.html";
@@ -18,7 +18,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const clearBtn = document.getElementById("clearChat");
     const modelInput = document.getElementById("ollamaModel");
     const ollamaStatus = document.getElementById("ollamaStatus");
-
     const OLLAMA_URL = "http://localhost:11434/api/chat";
     const username = isAuthenticated ? (localStorage.getItem("username") || "Student") : "Guest";
     const email = isAuthenticated ? (localStorage.getItem("email") || "") : "";

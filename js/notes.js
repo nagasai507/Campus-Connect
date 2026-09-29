@@ -4,8 +4,8 @@
 
 document.addEventListener("DOMContentLoaded", () => {
 
-    const publicMode = new URLSearchParams(window.location.search).get("public") === "1";
-    const isAuthenticated = !publicMode && localStorage.getItem("isLoggedIn") === "true";
+    const isAuthenticated = localStorage.getItem("isLoggedIn") === "true";
+    const publicMode = !isAuthenticated && new URLSearchParams(window.location.search).get("public") === "1";
 
     if (!publicMode && !isAuthenticated) {
         window.location.href = "login.html";
