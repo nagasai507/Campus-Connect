@@ -9,11 +9,14 @@
         Page Header / Nav
 ============================ */
 
+html{
+    scrollbar-gutter:stable;
+}
+
 .header{
-    display:flex;
-    justify-content:space-between;
+    display:grid;
+    grid-template-columns:250px minmax(0,1fr);
     align-items:center;
-    flex-wrap:wrap;
     gap:15px;
     padding:20px 6%;
     background:rgba(255,255,255,.08);
@@ -22,6 +25,11 @@
     position:sticky;
     top:0;
     z-index:50;
+}
+
+.header > .logo,
+.header > h1{
+    grid-column:1;
 }
 
 .header h1{
@@ -33,6 +41,8 @@
 .header nav{
     display:flex;
     flex-wrap:wrap;
+    grid-column:2;
+    justify-content:flex-end;
     gap:8px;
     position:static;
     width:auto;
@@ -1245,6 +1255,19 @@ footer{
         text-align:center;
     }
 
+}
+
+@media(max-width:1250px){
+    .header{
+        grid-template-columns:minmax(0,1fr);
+    }
+
+    .header > .logo,
+    .header > h1,
+    .header nav{
+        grid-column:1;
+        justify-content:center;
+    }
 }
 
 @media(max-width:700px){
